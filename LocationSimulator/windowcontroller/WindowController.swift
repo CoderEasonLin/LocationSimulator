@@ -121,11 +121,24 @@ class WindowController: NSWindowController {
         viewController.spoofer?.moveType = MoveType(rawValue: sender.selectedSegment)!
     }
 
+    func dialogOKCancel(question: String, text: String) -> Bool {
+        let alert = NSAlert()
+        alert.messageText = question
+        alert.informativeText = text
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Cancel")
+        return alert.runModal() == .alertFirstButtonReturn
+    }
+    
     /// Stop spoofing the current location.
     /// - Parameter sender: the button which triggered the action
     @IBAction func resetClicked(_ sender: Any) {
         guard let viewController = contentViewController as? MapViewController else { return }
-        viewController.spoofer?.resetLocation()
+        let answer = dialogOKCancel(question: "Are you sure to reset your location ?", text: "Reset location in game might got ban.")
+        if answer == true {
+            viewController.spoofer?.resetLocation()
+        }
     }
 
     /// Change the currently select device to the new devive choosen from the list.
