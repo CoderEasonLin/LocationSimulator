@@ -89,12 +89,18 @@ class MapViewController: NSViewController {
 
     /// True if a alert is visible, false otherwise.
     var isShowingAlert: Bool = false
+    
+    var appLocationManager: CLLocationManager!
 
     // MARK: - View lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        // 讓裝置連上後可以直接使用電腦的位置，便於操作。
+        self.appLocationManager = CLLocationManager()
+        self.appLocationManager.requestAlwaysAuthorization()
+        
         // reset the total distance label
         self.totalDistanceLabel.stringValue = String(format: NSLocalizedString("TOTAL_DISTANCE", comment: ""), 0)
 
@@ -270,6 +276,10 @@ class MapViewController: NSViewController {
         }
         return false
     }
+    
+    func setToDeviceLocation() {
+        
+    }
 
     // MARK: - Spinner control
 
@@ -426,7 +436,10 @@ class MapViewController: NSViewController {
             let coordinate = mapView.convert(loc, toCoordinateFrom: mapView)
 
             if self.currentLocationMarker == nil {
-                self.spoofer?.setLocation(coordinate)
+                let answer = self.view.window?.confirm(message: "Are you sure want to set current location to here ?", informativeText: "If you in game, you might got ban.")
+                if answer == true {
+                    self.spoofer?.setLocation(coordinate)
+                }
             } else {
                 self.requestTeleportOrNavigation(toCoordinate: coordinate)
             }

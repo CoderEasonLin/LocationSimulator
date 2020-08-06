@@ -20,4 +20,14 @@ extension NSWindow {
         alert.alertStyle = .critical
         alert.beginSheetModal(for: self, completionHandler: nil)
     }
+    
+    func confirm(message: String, informativeText: String) -> Bool {
+        let alert = NSAlert()
+        alert.messageText = message
+        alert.informativeText = informativeText
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Cancel")
+        return alert.runModal() == .alertFirstButtonReturn
+    }
 }

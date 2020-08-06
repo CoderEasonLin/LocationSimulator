@@ -14,6 +14,8 @@ import MapKit
 class WindowController: NSWindowController {
     /// Enable, disable autofocus current location.
     @IBOutlet weak var currentLocationButton: NSButton!
+    
+    @IBOutlet weak var setToDeviceLocationButton: NSButton!
 
     /// Change the current move speed.
     @IBOutlet weak var typeSegmented: NSSegmentedControl!
@@ -102,6 +104,18 @@ class WindowController: NSWindowController {
         }
     }
 
+    // 若裝置連接，可直接使用目前app的位置來做為起始位置
+    @IBAction func setToDeviceLocationClicked(_ sender: NSButton) {
+        guard let viewController = self.contentViewController as? MapViewController else { return }
+
+        
+        if viewController.currentLocationMarker == nil {
+            sender.state = .off
+        } else {
+            viewController.autoFocusCurrentLocation = (sender.state == .on)
+        }
+    }
+    
     /// Change the move speed to walk / cycle / drive based on the selected segment. Futhermore update the tool- and
     /// touchbar to represent the current status.
     /// - Parameter sender: the segmented control instance inside the tool- or touchbar.
@@ -121,21 +135,13 @@ class WindowController: NSWindowController {
         viewController.spoofer?.moveType = MoveType(rawValue: sender.selectedSegment)!
     }
 
-    func dialogOKCancel(question: String, text: String) -> Bool {
-        let alert = NSAlert()
-        alert.messageText = question
-        alert.informativeText = text
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: "OK")
-        alert.addButton(withTitle: "Cancel")
-        return alert.runModal() == .alertFirstButtonReturn
-    }
+    
     
     /// Stop spoofing the current location.
     /// - Parameter sender: the button which triggered the action
     @IBAction func resetClicked(_ sender: Any) {
         guard let viewController = contentViewController as? MapViewController else { return }
-        let answer = dialogOKCancel(question: "Are you sure to reset your location ?", text: "Reset location in game might got ban.")
+        let answer = self.window?.confirm(message: "Are you sure to reset your location ?", informativeText: "Reset location in game might got ban.")
         if answer == true {
             viewController.spoofer?.resetLocation()
         }
