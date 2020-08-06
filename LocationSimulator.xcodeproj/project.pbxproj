@@ -819,7 +819,7 @@
 				63A4F928240366EA00C3D877 /* Homebrew */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		13BA352620A433EF00A0431C /* Build configuration list for PBXNativeTarget "LocationSimulator" */ = {
 			isa = XCConfigurationList;
@@ -829,7 +829,7 @@
 				63A4F929240366EA00C3D877 /* Homebrew */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
