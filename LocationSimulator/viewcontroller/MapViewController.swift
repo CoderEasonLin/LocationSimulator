@@ -278,7 +278,8 @@ class MapViewController: NSViewController {
     }
     
     func setToDeviceLocation() {
-        
+        guard let coordinate = self.appLocationManager.location?.coordinate else { return }
+        self.spoofer?.setLocation(coordinate)
     }
 
     // MARK: - Spinner control

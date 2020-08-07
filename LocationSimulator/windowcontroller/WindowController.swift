@@ -107,12 +107,12 @@ class WindowController: NSWindowController {
     // 若裝置連接，可直接使用目前app的位置來做為起始位置
     @IBAction func setToDeviceLocationClicked(_ sender: NSButton) {
         guard let viewController = self.contentViewController as? MapViewController else { return }
-
         
         if viewController.currentLocationMarker == nil {
-            sender.state = .off
-        } else {
-            viewController.autoFocusCurrentLocation = (sender.state == .on)
+            let answer = self.window?.confirm(message: "Are you sure want to set location to app location ?", informativeText: "In game might got ban.")
+            if answer == true {
+                viewController.setToDeviceLocation()
+            }
         }
     }
     
