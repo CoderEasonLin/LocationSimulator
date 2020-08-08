@@ -26,6 +26,7 @@ enum MoveType: Int {
     case walk = 0
     case cycle
     case car
+    case highWay
 
     var distance: Double {
         // distance meters per second
@@ -36,6 +37,8 @@ enum MoveType: Int {
             return 4.2  // 15km/h
         case .car:
             return 11.1 // 40km/h
+        case .highWay:
+            return 25 // 90km/h
         }
     }
 }

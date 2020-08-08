@@ -183,7 +183,7 @@ class WindowController: NSWindowController {
         // load the new device
         if viewController.loadDevice(udid) {
             // set the correct walking speed based on the current selection
-            viewController.spoofer?.moveType = MoveType(rawValue: self.typeSegmented.selectedSegment) ?? .walk
+            viewController.spoofer?.moveType = MoveType(rawValue: self.typeSegmented.selectedSegment) ?? .cycle
 
             // Check if we already have a known location for this device, if so load it.
             // TODO: This is not an optimal solution, because we do not keep information about the current route or
