@@ -92,6 +92,11 @@ class MapViewController: NSViewController {
     
     var appLocationManager: CLLocationManager!
 
+    var annotations: [MKAnnotation] = []
+
+    var isAutoWalkByAnnotations: Bool = false
+    var currentWalkingDirectionAnnotationIndex: Int = -1
+    var autoWalkByAnnotationsTimer: Timer? = nil
     // MARK: - View lifecycle
 
     override func viewDidLoad() {
@@ -139,6 +144,10 @@ class MapViewController: NSViewController {
         mapPressGesture.numberOfTouchesRequired = 1
         mapView.addGestureRecognizer(mapPressGesture)
 
+        let mapRightClickGesture = NSClickGestureRecognizer(target: self, action: #selector(mapViewRightClicked(_:)))
+        mapRightClickGesture.buttonMask = 0x2
+        mapView.addGestureRecognizer(mapRightClickGesture)
+
         let headingPressGesture = NSPressGestureRecognizer(target: self, action: #selector(headingViewPressed(_:)))
         headingPressGesture.minimumPressDuration = 0.1
         headingPressGesture.numberOfTouchesRequired = 1
@@ -165,6 +174,37 @@ class MapViewController: NSViewController {
         // Fixme: This is ugly, but I can not get another solution to work...
         NotificationCenter.default.addObserver(self, selector: #selector(themeChanged),
                                                name: .AppleInterfaceThemeChanged, object: nil)
+    }
+
+    // enable/disable to auto walk to next annotation.
+    func autoWalkByAnnotations(_ isEnable: Bool) {
+        guard let spoofer = self.spoofer, let currentLoc = self.spoofer?.currentLocation else { return }
+
+        isAutoWalkByAnnotations = isEnable
+        if isAutoWalkByAnnotations == true {
+            if annotations.count == 0 { return }
+
+            // start next annotation by index
+            currentWalkingDirectionAnnotationIndex = currentWalkingDirectionAnnotationIndex + 1
+            if currentWalkingDirectionAnnotationIndex >= annotations.count {
+                currentWalkingDirectionAnnotationIndex = 0
+            }
+            navigateTo(spoofer: spoofer, currentLoc: currentLoc, newCoords: annotations[currentWalkingDirectionAnnotationIndex].coordinate)
+        } else {
+            currentWalkingDirectionAnnotationIndex = -1
+            spoofer.moveState = .manual
+
+            autoWalkByAnnotationsTimer?.invalidate()
+            autoWalkByAnnotationsTimer = nil
+        }
+    }
+
+    // clear all annotation in map.
+    func clearAnnotations() {
+        if annotations.count > 0 {
+            mapView.removeAnnotations(annotations)
+            annotations.removeAll()
+        }
     }
 
     /// Make the window the first responder if it receives a mouse click.
@@ -396,25 +436,7 @@ class MapViewController: NSViewController {
             } else if res == NSApplication.ModalResponse.alertSecondButtonReturn {
                 // calculate the route, display it and start moving
                 guard let spoofer = self.spoofer, let currentLoc = self.spoofer?.currentLocation else { return }
-
-                let transportType: MKDirectionsTransportType = (spoofer.moveType == .car) ? .automobile : .walking
-
-                // stop automoving before we calculate the route
-                spoofer.moveState = .manual
-
-                // indicate work while we calculate the route
-                self.startSpinner()
-
-                // calulate the route to the destination
-                currentLoc.calculateRouteTo(newCoords!, transportType: transportType) {route in
-                    // set the current route to follow
-                    spoofer.route = route
-                    self.stopSpinner()
-
-                    // start automoving
-                    spoofer.moveState = .auto
-                    spoofer.move()
-                }
+                self.navigateTo(spoofer: spoofer, currentLoc: currentLoc, newCoords: newCoords)
             } else if res == NSApplication.ModalResponse.alertThirdButtonReturn {
                 // teleport to the new location
                 spoofer.setLocation(newCoords!)
@@ -423,6 +445,27 @@ class MapViewController: NSViewController {
             }
 
             self.isShowingAlert = false
+        }
+    }
+
+    private func navigateTo(spoofer: LocationSpoofer, currentLoc: CLLocationCoordinate2D, newCoords: CLLocationCoordinate2D?) {
+        let transportType: MKDirectionsTransportType = (spoofer.moveType == .car) ? .automobile : .walking
+
+        // stop automoving before we calculate the route
+        spoofer.moveState = .manual
+
+        // indicate work while we calculate the route
+        self.startSpinner()
+
+        // calulate the route to the destination
+        currentLoc.calculateRouteTo(newCoords!, transportType: transportType) {route in
+            // set the current route to follow
+            spoofer.route = route
+            self.stopSpinner()
+
+            // start automoving
+            spoofer.moveState = .auto
+            spoofer.move()
         }
     }
 
@@ -445,6 +488,18 @@ class MapViewController: NSViewController {
                 self.requestTeleportOrNavigation(toCoordinate: coordinate)
             }
             self.view.window?.makeFirstResponder(self.mapView)
+        }
+    }
+
+    // add annotation when user right click in map view.
+    @objc func mapViewRightClicked(_ sender: NSClickGestureRecognizer) {
+        if sender.state == .ended {
+            let loc = sender.location(in: mapView)
+            let coordinate = mapView.convert(loc, toCoordinateFrom: mapView)
+
+            let annotation = MKPointAnnotation(__coordinate: coordinate)
+            annotations.append(annotation)
+            mapView.addAnnotation(annotation)
         }
     }
 

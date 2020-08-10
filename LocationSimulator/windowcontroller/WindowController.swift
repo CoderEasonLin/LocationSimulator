@@ -17,6 +17,8 @@ class WindowController: NSWindowController {
     
     @IBOutlet weak var setToDeviceLocationButton: NSButton!
 
+    @IBOutlet weak var autoWalkByAnnotationsButton: NSButton!
+
     /// Change the current move speed.
     @IBOutlet weak var typeSegmented: NSSegmentedControl!
 
@@ -144,6 +146,29 @@ class WindowController: NSWindowController {
         let answer = self.window?.confirm(message: "Are you sure to reset your location ?", informativeText: "Reset location in game might got ban.")
         if answer == true {
             viewController.spoofer?.resetLocation()
+        }
+    }
+
+    // clear all user annotations.
+    @IBAction func clearAnnotationsClicked(_ sender: Any) {
+        guard let viewController = contentViewController as? MapViewController else { return }
+        viewController.clearAnnotations()
+    }
+
+    // start auto walk by annotations one by one
+    @IBAction func autoWalkByAnnotationsClicked(_ sender: Any) {
+        guard let viewController = contentViewController as? MapViewController else { return }
+        viewController.autoWalkByAnnotations(autoWalkByAnnotationsButton.state == .on)
+
+        viewController.autoWalkByAnnotationsTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1), target: self, selector: #selector(checkAutoWalkByAnnotations), userInfo: nil, repeats: true)
+    }
+
+    // since when walk arrive an annotation, the spoofer will stop and turn to manual mode.
+    // so use a timer to check if the moveState is ture to manual and still in auto walk mode, then trigger walk to next annotation.
+    @objc func checkAutoWalkByAnnotations() {
+        guard let viewController = contentViewController as? MapViewController else { return }
+        if viewController.spoofer?.moveState == .manual && autoWalkByAnnotationsButton.state == .on {
+            viewController.autoWalkByAnnotations(true)
         }
     }
 

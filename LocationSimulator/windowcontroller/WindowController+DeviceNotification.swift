@@ -14,8 +14,11 @@ extension WindowController {
     /// - Parameter notification: notification with device information (UDID and name)
     @objc func deviceConnected(_ notification: Notification) {
         guard let udid: String = notification.userInfo?["UDID"] as? String,
-            let name: String = notification.userInfo?["NAME"] as? String else { return }
+            let name: String = notification.userInfo?["NAME"] as? String,
+            let connectType: ConnectionType = notification.userInfo?["CONTYPE"] as? ConnectionType else { return }
 
+        print("[DEBUG]: Device connected \(name) via \(connectType)")
+        
         // For some reason sometimes the same device should be added twice
         if self.deviceUDIDs.contains(udid) { return }
 
@@ -47,8 +50,10 @@ extension WindowController {
     /// - Parameter notification: notification with device information (UDID)
     @objc func deviceDisconnected(_ notification: Notification) {
         guard let udid: String = notification.userInfo?["UDID"] as? String,
+            let name: String = notification.userInfo?["NAME"] as? String,
             let viewController = contentViewController as? MapViewController else { return }
 
+        NSLog("Device disconnected \(udid)")
         // remove the device from the list and the list popup
         if let index: Int = self.deviceUDIDs.firstIndex(of: udid) {
             let removedCurrentDevice = (self.devicesPopup.indexOfSelectedItem == index)

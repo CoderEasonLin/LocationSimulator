@@ -126,6 +126,7 @@ extension MapViewController: LocationSpooferDelegate {
             NavigationMenubarItem.moveDown.enable()
             // we disabled automove => we can not stop the navigation
             NavigationMenubarItem.stopNavigation.disable()
+
         case .auto:
             moveButton.image = #imageLiteral(resourceName: "MoveButtonAuto")
 
