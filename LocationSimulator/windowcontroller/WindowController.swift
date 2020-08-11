@@ -160,7 +160,7 @@ class WindowController: NSWindowController {
         guard let viewController = contentViewController as? MapViewController else { return }
         viewController.autoWalkByAnnotations(autoWalkByAnnotationsButton.state == .on)
 
-        viewController.autoWalkByAnnotationsTimer = Timer.scheduledTimer(timeInterval: TimeInterval(1), target: self, selector: #selector(checkAutoWalkByAnnotations), userInfo: nil, repeats: true)
+        viewController.autoWalkByAnnotationsTimer = Timer.scheduledTimer(timeInterval: TimeInterval(5), target: self, selector: #selector(checkAutoWalkByAnnotations), userInfo: nil, repeats: true)
     }
 
     // since when walk arrive an annotation, the spoofer will stop and turn to manual mode.

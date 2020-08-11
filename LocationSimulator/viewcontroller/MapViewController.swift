@@ -171,6 +171,13 @@ class MapViewController: NSViewController {
         // load the design for the current theme
         self.updateAppearance()
 
+        // add annotation for current app location. (macbook location)
+        var appLocation = self.appLocationManager.location?.coordinate ?? nil
+        if appLocation != nil {
+            var annotation = MKPointAnnotation(__coordinate: appLocation!)
+            self.mapView.addAnnotation(annotation)
+        }
+
         // Fixme: This is ugly, but I can not get another solution to work...
         NotificationCenter.default.addObserver(self, selector: #selector(themeChanged),
                                                name: .AppleInterfaceThemeChanged, object: nil)
