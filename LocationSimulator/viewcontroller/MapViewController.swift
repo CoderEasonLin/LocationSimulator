@@ -456,7 +456,9 @@ class MapViewController: NSViewController {
     }
 
     private func navigateTo(spoofer: LocationSpoofer, currentLoc: CLLocationCoordinate2D, newCoords: CLLocationCoordinate2D?) {
-        let transportType: MKDirectionsTransportType = (spoofer.moveType == .car) ? .automobile : .walking
+        // always use walking to calculate the short direction.
+        //let transportType: MKDirectionsTransportType = (spoofer.moveType == .car) ? .automobile : .walking
+        let transportType: MKDirectionsTransportType = .walking
 
         // stop automoving before we calculate the route
         spoofer.moveState = .manual
