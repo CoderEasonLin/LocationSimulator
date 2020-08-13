@@ -17,7 +17,7 @@ extension WindowController {
             let name: String = notification.userInfo?["NAME"] as? String,
             let connectType: ConnectionType = notification.userInfo?["CONTYPE"] as? ConnectionType else { return }
 
-        print("[DEBUG]: Device connected \(name) via \(connectType)")
+        NSLog("[DEBUG]: Device connected \(name) \(udid) via \(connectType)")
         
         // For some reason sometimes the same device should be added twice
         if self.deviceUDIDs.contains(udid) { return }
@@ -62,31 +62,36 @@ extension WindowController {
             // remove the last known location for this device
             self.lastKnownLocationCache.removeValue(forKey: udid)
 
-            if let spoofer = viewController.spoofer {
-                // disable all events
-                spoofer.moveState = .manual
-                spoofer.delegate = nil
+            // only if the current device = disconnected device, clear all current status.
+            if removedCurrentDevice == true {
+                if let spoofer = viewController.spoofer {
+                    // disable all events
+                    spoofer.moveState = .manual
+                    spoofer.delegate = nil
 
-                // make sure the GUI is reset
-                viewController.willChangeLocation(spoofer: spoofer, toCoordinate: nil)
-                viewController.didChangeLocation(spoofer: spoofer, toCoordinate: nil)
-            }
+                    // make sure the GUI is reset
+                    viewController.willChangeLocation(spoofer: spoofer, toCoordinate: nil)
+                    viewController.didChangeLocation(spoofer: spoofer, toCoordinate: nil)
+                }
 
-            // cleanup the spoofer instance for the device
-            viewController.spoofer = nil
-            // reset the total distance label
-            let emptyTotalDistanceString = String(format: NSLocalizedString("TOTAL_DISTANCE", comment: ""), 0)
-            viewController.totalDistanceLabel.stringValue = emptyTotalDistanceString
+                // cleanup the spoofer instance for the device
+                viewController.spoofer = nil
+                // reset the total distance label
+                let emptyTotalDistanceString = String(format: NSLocalizedString("TOTAL_DISTANCE", comment: ""), 0)
+                viewController.totalDistanceLabel.stringValue = emptyTotalDistanceString
 
-            // disable the menubar items
-            let items: [NavigationMenubarItem] = [.setLocation, .toggleAutomove, .moveUp, .moveDown,
-                                                  .moveCounterclockwise, .moveClockwise, .stopNavigation,
-                                                  .recentLocation]
-            items.forEach { item in item.disable() }
+                // disable the menubar items
+                let items: [NavigationMenubarItem] = [.setLocation, .toggleAutomove, .moveUp, .moveDown,
+                                                      .moveCounterclockwise, .moveClockwise, .stopNavigation,
+                                                      .recentLocation]
+                items.forEach { item in
+                    item.disable()
+                }
 
-            // try to select the next device in the list
-            if removedCurrentDevice, self.devicesPopup.numberOfItems > 0 {
-                self.deviceSelected(self.devicesPopup)
+                // try to select the next device in the list
+                if self.devicesPopup.numberOfItems > 0 {
+                    self.deviceSelected(self.devicesPopup)
+                }
             }
         }
     }
